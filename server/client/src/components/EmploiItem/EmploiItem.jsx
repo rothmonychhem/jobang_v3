@@ -2,15 +2,13 @@ import React, { useState, useEffect } from "react";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import "./EmploiItem.css";
 import { useEmploiContext } from "../../hooks/useEmploiContext";
-import { useCandidatContext } from "../../hooks/useCandidatContext"; // Import candidat context if token is here
+import { useCandidatContext } from "../../hooks/useCandidatContext";
 
 const EmploiItem = ({ searchTerm, location, likedJobs, setLikedJobs }) => {
   const [showEmail, setShowEmail] = useState(false);
-  const [selectedEmploi, setSelectedEmploi] = useState(null);
-  const [showDetails, setShowDetails] = useState(false);
-
+  const [selectedEmploi, setSelectedEmploi] = useState(null); // Track selected emploi for details
   const { emplois, dispatch } = useEmploiContext();
-  const { candidat } = useCandidatContext(); // Access the candidat context to get the token
+  const { candidat } = useCandidatContext();
 
   useEffect(() => {
     const fetchEmploi = async () => {
@@ -18,14 +16,11 @@ const EmploiItem = ({ searchTerm, location, likedJobs, setLikedJobs }) => {
         const response = await fetch('/api/offreEmploi', {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${candidat.token}` // Add token to headers
+            'Authorization': `Bearer ${candidat.token}`
           }
         });
-
         const json = await response.json();
-
         if (response.ok) {
-          console.log('Fetched emplois:', json);
           dispatch({ type: 'SET_EMPLOIS', payload: json });
         } else {
           console.error('Error fetching emplois:', json);
@@ -35,15 +30,12 @@ const EmploiItem = ({ searchTerm, location, likedJobs, setLikedJobs }) => {
       }
     };
 
-    if (candidat && candidat.token) { // Ensure token exists before making the request
+    if (candidat && candidat.token) {
       fetchEmploi();
     }
-  }, [dispatch, candidat]); // Depend on candidat to ensure token is available
+  }, [dispatch, candidat]);
 
   const emploisList = emplois || [];
-
-  console.log("emploiList", emploisList); // Check if emploisList has data
-
   const filteredEmplois = emploisList.filter(emploi => {
     return (
       emploi.visibility === true &&
@@ -55,11 +47,9 @@ const EmploiItem = ({ searchTerm, location, likedJobs, setLikedJobs }) => {
     );
   });
 
-  console.log("filteredEmplois", filteredEmplois);
-
-  if (!emploisList.length) {
-    return <div>Loading...</div>;
-  }
+  const toggleDetails = (emploi) => {
+    setSelectedEmploi((prevEmploi) => (prevEmploi === emploi ? null : emploi));
+  };
 
   return (
     <div>
@@ -67,7 +57,6 @@ const EmploiItem = ({ searchTerm, location, likedJobs, setLikedJobs }) => {
         {filteredEmplois.length > 0 ? (
           filteredEmplois.map((emploi) => (
             <div className="emploi-container" key={emploi.nom_poste}>
-              {/* Like Icon */}
               <div
                 className="like-icon"
                 onClick={() => {
@@ -88,10 +77,9 @@ const EmploiItem = ({ searchTerm, location, likedJobs, setLikedJobs }) => {
                 )}
               </div>
 
-              {/* Job Title */}
               <h3
                 className="jobTitle"
-                onClick={() => setShowDetails(!showDetails)}
+                onClick={() => toggleDetails(emploi)}
                 style={{ cursor: "pointer" }}
               >
                 {emploi.nom_poste}
@@ -109,33 +97,25 @@ const EmploiItem = ({ searchTerm, location, likedJobs, setLikedJobs }) => {
                 <span className="label">Emplacement:</span> {emploi.emplacement}
               </span>
 
-              {/* Apply Button */}
-              <button className="buttonP" onClick={() => setShowEmail(!showEmail)}>
+              <button className="buttonP" onClick={() => setShowEmail((prev) => prev === emploi ? null : emploi)}>
                 Postuler
               </button>
 
-              {/* Email Popup */}
-              {showEmail && selectedEmploi === emploi && (
+              {showEmail === emploi && (
                 <div className="popup">
                   <div className="popup-content">
-                    <span className="close" onClick={() => setShowEmail(false)}>
+                    <span className="close" onClick={() => setShowEmail(null)}>
                       &times;
                     </span>
-                    <h4>
-                      Email:{" "}
-                      <a href={`mailto:${emploi.email_employeur}`}>
-                        {emploi.email_employeur}
-                      </a>
-                    </h4>
+                    <h4>Email: <a href={`mailto:${emploi.email_employeur}`}>{emploi.email_employeur}</a></h4>
                   </div>
                 </div>
               )}
 
-              {/* Job Details Popup */}
-              {showDetails && selectedEmploi === emploi && (
+              {selectedEmploi === emploi && (
                 <div className="details-popup">
                   <div className="details-popup-content">
-                    <span className="close" onClick={() => setShowDetails(false)}>
+                    <span className="close" onClick={() => toggleDetails(emploi)}>
                       &times;
                     </span>
                     <div className="details-content">
