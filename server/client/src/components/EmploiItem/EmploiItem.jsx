@@ -122,9 +122,9 @@ const EmploiItem = ({ searchTerm, location, likedJobs, setLikedJobs }) => {
                       <h4>Description:</h4>
                       <p>{emploi.description}</p>
                       <h4>Responsabilités:</h4>
-                      <p>{emploi.responsabilites}</p>
+                      <p>{emploi.responsabilite}</p>
                       <h4>Exigences:</h4>
-                      <p>{emploi.exigences}</p>
+                      <p>{emploi.exigence}</p>
                     </div>
                   </div>
                 </div>
